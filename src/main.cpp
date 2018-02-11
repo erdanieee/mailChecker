@@ -5,26 +5,29 @@
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>   //https://github.com/witnessmenow/Universal-Arduino-Telegram-Bot
 
+#ifndef PRIVATE
+  #define BOTtoken        "XXXXXXXXXXXXX"
+  const char* ssid      = "XXXXXXXXXXXXX";
+  const char* password  = "XXXXXXXXXXXXX";
+  const char* chat_id   = "XXXXXXXXXXXXX";
+#endif
+
+
 #define pinSwithNewMail 13      // interrupt TODO: check
 #define pinSwithOpen    14      // interrupt TODO: check
 #define pinOTA          4       // IO        TODO: check
 
-
-#ifndef PRIVATE
-  #define BOTtoken "XXXXXXXXXXXXX"
-  const char* ssid = "XXXXXXXXXXXXX";
-  const char* password = "XXXXXXXXXXXXX";
-  const char* chat_id = "XXXXXXXXXXXXX";
-#endif
+#define MAX_TIME_EMAIL_BLOCKED    5000
+#define MAX_TIME_DOOR_OPENED     10000
 
 
-
-bool isNewEmail, isOpened, isOTAEnabled;
+bool isNewEmail, isDoorOpened, isMailInBlocked, isDoorLeavedOpen;
 
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
 
-unsigned long Bot_lasttime;
+unsigned long mail_lastTime, open_lastTime;
+
 
 extern "C" {
 #include "user_interface.h"
@@ -36,7 +39,7 @@ void newEmailISR(){
 }
 
 void openISR(){
-  isOpened = true;
+  isDoorOpened = true;
 }
 
 
@@ -65,8 +68,6 @@ void setup() {
     delay(500);
   }
 
-  wifi_set_sleep_type(LIGHT_SLEEP_T);
-
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
@@ -74,6 +75,7 @@ void setup() {
 
   attachInterrupt(pinSwithNewMail,  newEmailISR, FALLING);
   attachInterrupt(pinSwithOpen,     openISR, FALLING);
+  wifi_set_sleep_type(LIGHT_SLEEP_T);
 }
 
 
@@ -81,14 +83,34 @@ void setup() {
 
 void loop() {
   if (isNewEmail){
+    mail_lastTime = millis();
     bot.sendMessage(chat_id, "\u0001F4E8 Nuevo correo \u2709\ufe0f\n", "");
+    delay(100);
     isNewEmail = false;
+    isMailInBlocked = false;
   }
 
-  if (isOpened){
+  if (isDoorOpened){
+    open_lastTime = millis();
     bot.sendMessage(chat_id, "\u0001F4EC Buzón abierto \u2709\ufe0f", "");
-    isOpened = false;
+    delay(100);
+    isDoorOpened = false;
+    isDoorLeavedOpen = false;
   }
 
-  delay(10000);
+  if ( digitalRead(pinSwithNewMail) == LOW &&
+          !isMailInBlocked &&
+          (millis() - mail_lastTime) > MAX_TIME_EMAIL_BLOCKED){
+      bot.sendMessage(chat_id, "Hay algo bloqueando la entrada del buzón... ¿publicidad?", "");
+      isMailInBlocked = true;
+  }
+
+  if ( digitalRead(pinSwithOpen) == LOW &&
+          !isDoorLeavedOpen &&
+          (millis() - open_lastTime) > MAX_TIME_DOOR_OPENED){
+      bot.sendMessage(chat_id, "¡¡¡ATENCIÓN!! ¡¡¡El buzón se ha quedado abierto!!!", "");
+      isDoorLeavedOpen = true;
+  }
+
+  delay(5000);
 }
