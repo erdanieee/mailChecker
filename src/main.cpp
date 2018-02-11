@@ -85,17 +85,17 @@ void loop() {
   if (isNewEmail){
     mail_lastTime = millis();
     bot.sendMessage(chat_id, "\u0001F4E8 Nuevo correo \u2709\ufe0f\n", "");
-    delay(100);
     isNewEmail = false;
     isMailInBlocked = false;
+    delay(100);
   }
 
   if (isDoorOpened){
     open_lastTime = millis();
     bot.sendMessage(chat_id, "\u0001F4EC Buzón abierto \u2709\ufe0f", "");
-    delay(100);
     isDoorOpened = false;
     isDoorLeavedOpen = false;
+    delay(100);
   }
 
   if ( digitalRead(pinSwithNewMail) == LOW &&
