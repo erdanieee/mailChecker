@@ -4,8 +4,6 @@
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>   //https://github.com/witnessmenow/Universal-Arduino-Telegram-Bot
 
-#define BOTtoken "542061414:AAEW2Oug178HgJGeHfqh2S7ziMD88QpM6HE"
-
 #define pinSwithNewMail 13      // interrupt TODO: check
 #define pinSwithOpen    14      // interrupt TODO: check
 #define pinOTA          4       // IO        TODO: check
