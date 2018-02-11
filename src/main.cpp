@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <main.h>
+#include <private.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>   //https://github.com/witnessmenow/Universal-Arduino-Telegram-Bot
