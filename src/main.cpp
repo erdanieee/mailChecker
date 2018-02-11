@@ -9,11 +9,17 @@
 #define pinSwithOpen    14      // interrupt TODO: check
 #define pinOTA          4       // IO        TODO: check
 
-bool isNewEmail, isOpened, isOTAEnabled;
 
-const char* ssid = "liberad a wifiiiii";
-const char* password = "KwA6W6TARBMb";
-const char* chat_id = "-260660364";
+#ifndef PRIVATE
+  #define BOTtoken "XXXXXXXXXXXXX"
+  const char* ssid = "XXXXXXXXXXXXX";
+  const char* password = "XXXXXXXXXXXXX";
+  const char* chat_id = "XXXXXXXXXXXXX";
+#endif
+
+
+
+bool isNewEmail, isOpened, isOTAEnabled;
 
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
